@@ -231,7 +231,6 @@ const LeadDetailsModal = () => {
     setDraftEmail(lead.savedEmailDraft || '');
     setMeetingSummary(null);
     setMeetingNotes('');
-// eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lead?.id]);
 
   if (!lead) return null;
@@ -1274,25 +1273,20 @@ const AuthPage = () => {
 
 // ─── App shell ────────────────────────────────────────────────────────────────
 const AppContent = () => {
-  const { hasEnteredApp, isAuthReady, dataLoading } = useContext(AppContext);
+  const { hasEnteredApp, isAuthReady, dataLoading, login } = useContext(AppContext);
   const [currentRoute, setCurrentRoute] = useState('dashboard');
 
-  if (!isAuthReady) return (
+  // Auto-login: skip landing page, go straight to dashboard
+  useEffect(() => {
+    if (isAuthReady && !hasEnteredApp) {
+      login('demo@dealtrack.hq');
+    }
+  }, [isAuthReady, hasEnteredApp, login]);
+
+  if (!isAuthReady || !hasEnteredApp || dataLoading) return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center">
       <RefreshCw className="w-8 h-8 text-indigo-600 animate-spin mb-4" />
-      <p className="text-slate-500 text-sm">Loading…</p>
-    </div>
-  );
-
-  if (!hasEnteredApp) {
-    if (currentRoute === 'login') return <AuthPage />;
-    return <LandingPage onNavigate={setCurrentRoute} />;
-  }
-
-  if (dataLoading) return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center">
-      <RefreshCw className="w-8 h-8 text-indigo-600 animate-spin mb-4" />
-      <p className="text-slate-600 font-medium">Syncing CRM data…</p>
+      <p className="text-slate-500 text-sm">Loading DealTrackHQ…</p>
     </div>
   );
 
